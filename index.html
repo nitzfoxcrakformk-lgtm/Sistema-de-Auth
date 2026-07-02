@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autenticación</title>
+  <link rel="icon" type="image/png" href="setts.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Acme&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg1: #170407;
+      --bg2: #3b0711;
+      --bg3: #5c0d1a;
+      --bg4: #24060d;
+      --panel: rgba(10, 0, 0, 0.72);
+      --panel-border: rgba(255, 255, 255, 0.22);
+      --white: #ffffff;
+      --text-soft: rgba(255,255,255,0.82);
+      --red: rgba(255, 70, 70, 0.95);
+      --green: rgba(70, 255, 120, 0.95);
+      --yellow: rgba(255, 224, 92, 0.95);
+      --blue: rgba(90, 170, 255, 0.95);
+      --orange: rgba(255, 166, 64, 0.95);
+      --purple: rgba(182, 106, 255, 0.95);
+      --gray: rgba(220, 220, 220, 0.95);
+      --teal: rgba(94, 225, 210, 0.95);
+      --pink: rgba(255, 110, 200, 0.95);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      min-height: 100%;
+      overflow-x: hidden;
+      font-family: Arial, sans-serif;
+      color: var(--white);
+      background: var(--bg1);
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      padding: 24px;
+    }
+
+    .animated-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -3;
+      background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 33%, var(--bg3) 62%, var(--bg4) 100%);
+      background-size: 300% 300%;
+      animation: bgShift 14s ease infinite;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 34%),
+        radial-gradient(circle at bottom, rgba(255,255,255,0.05), transparent 28%);
+      pointer-events: none;
+    }
+
+    @keyframes bgShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .camera-shake { animation: shake 0.35s linear 0s 2; }
+    @keyframes shake {
+      0% { transform: translate(0, 0); }
+      20% { transform: translate(-2px, 1px); }
+      40% { transform: translate(2px, -1px); }
+      60% { transform: translate(-1px, 1px); }
+      80% { transform: translate(1px, -1px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    .hero {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      width: 100%;
+      max-width: 920px;
+      padding: 24px 16px;
+    }
+
+    .title {
+      margin: 0;
+      font-family: 'Acme', sans-serif;
+      font-size: clamp(3.4rem, 8vw, 7.5rem);
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-shadow:
+        0 0 8px rgba(255,255,255,0.55),
+        0 0 18px rgba(255,255,255,0.35),
+        0 0 36px rgba(255,255,255,0.18);
+      animation: titleGlow 2.8s ease-in-out infinite alternate;
+    }
+
+    @keyframes titleGlow {
+      from { filter: brightness(1); transform: translateY(0); }
+      to { filter: brightness(1.10); transform: translateY(-1px); }
+    }
+
+    .subtitle {
+      margin: 12px auto 0;
+      max-width: 700px;
+      color: var(--text-soft);
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    .main-btn {
+      margin-top: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 28px;
+      border-radius: 0;
+      border: 2px solid rgba(255,255,255,0.40);
+      background: rgba(255,255,255,0.16);
+      color: var(--white);
+      font-size: 1.05rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.35), 0 0 22px rgba(255,255,255,0.12);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .main-btn:hover {
+      background: rgba(255,255,255,0.22);
+      border-color: rgba(255,255,255,0.62);
+      transform: scale(1.03);
+    }
+
+    .main-btn:active { transform: scale(0.98); }
+
+    .excel-float {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 30;
+    }
+
+    .excel-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      min-width: 92px;
+      border-radius: 0;
+      border: 2px solid rgba(255,255,255,0.42);
+      background: rgba(255,255,255,0.16);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.35), 0 0 18px rgba(255,255,255,0.10);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .excel-btn:hover {
+      background: rgba(255,255,255,0.22);
+      border-color: rgba(255,255,255,0.64);
+      transform: scale(1.03);
+    }
+
+    .excel-btn:active { transform: scale(0.98); }
+
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(0,0,0,0.72);
+    }
+
+    .backdrop.show { display: flex; }
+
+    .modal {
+      width: min(100%, 860px);
+      max-height: 92vh;
+      overflow: auto;
+      border-radius: 0;
+      padding: 24px;
+      background: var(--panel);
+      border: 2px solid var(--panel-border);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.7);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      animation: modalIn .2s ease-out;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(18px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .modal-header h2 { margin: 0; font-size: clamp(1.55rem, 3vw, 2.15rem); }
+    .modal-header p {
+      margin: 6px 0 0;
+      color: var(--text-soft);
+      font-size: 0.95rem;
+      line-height: 1.45;
+    }
+
+    .close-btn {
+      border: 2px solid rgba(255,255,255,0.24);
+      background: rgba(255,255,255,0.10);
+      color: white;
+      width: 42px;
+      height: 42px;
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 1.3rem;
+      flex: 0 0 auto;
+    }
+
+    .question {
+      margin-top: 14px;
+      padding: 16px;
+      border-radius: 0;
+      background: rgba(0,0,0,0.18);
+      border: 2px solid rgba(255,255,255,0.14);
+      transition: box-shadow .18s ease, border-color .18s ease, transform .18s ease, background .18s ease;
+    }
+
+    .question-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    .badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.12);
+      border: 2px solid rgba(255,255,255,0.22);
+      font-size: 0.95rem;
+      flex: 0 0 auto;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    @media (max-width: 760px) {
+      .options { grid-template-columns: 1fr; }
+      .hero { padding: 12px 4px; }
+      .modal { padding: 18px; }
+    }
+
+    .option {
+      display: block;
+      border-radius: 0;
+      padding: 12px 14px;
+      border: 2px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      cursor: pointer;
+      user-select: none;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease;
+    }
+
+    .option:hover { background: rgba(255,255,255,0.10); transform: translateY(-1px); }
+    .option input { display: none; }
+
+    .option-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.98rem;
+    }
+
+    .option.selected {
+      border-color: rgba(255,255,255,0.82);
+      background: rgba(255,255,255,0.16);
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.35), 0 0 18px rgba(255,255,255,0.12);
+    }
+
+    .check { display: none; font-weight: 700; }
+    .option.selected .check { display: inline; }
+
+    .fixed-code-shell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 10px 12px;
+      border-radius: 0;
+      border: 2px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.06);
+      width: 100%;
+    }
+
+    .fixed-part {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 44px;
+      padding: 0 2px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.96);
+      user-select: none;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .fixed-part.dash { opacity: 0.92; }
+
+    .code-input {
+      flex: 1 1 260px;
+      min-width: 0;
+      padding: 13px 14px;
+      border-radius: 0;
+      border: 2px solid rgba(255,255,255,0.20);
+      background: rgba(255,255,255,0.10);
+      color: white;
+      font-size: 1rem;
+      outline: none;
+      text-transform: none !important;
+      direction: ltr;
+      unicode-bidi: plaintext;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .code-part {
+      flex: 0 1 auto;
+      width: 92px;
+      max-width: 100%;
+      letter-spacing: 0.1em;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      text-transform: none !important;
+      direction: ltr;
+      unicode-bidi: plaintext;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .code-part-small { width: 76px; }
+
+    .code-hint {
+      width: 100%;
+      margin-top: 4px;
+      font-size: 0.86rem;
+      color: rgba(255,255,255,0.72);
+    }
+
+    .required-textarea {
+      width: 100%;
+      resize: vertical;
+      min-height: 110px;
+    }
+
+    .question.req-empty {
+      border-color: var(--red) !important;
+      background: rgba(255, 60, 60, 0.12) !important;
+      box-shadow: 0 0 0 1px rgba(255,70,70,0.35), 0 0 16px rgba(255,70,70,0.26), 0 0 34px rgba(255,70,70,0.12) !important;
+    }
+
+    .question.req-filled {
+      border-color: var(--green) !important;
+      background: rgba(70, 255, 120, 0.10) !important;
+      box-shadow: 0 0 0 1px rgba(70,255,120,0.28), 0 0 16px rgba(70,255,120,0.18), 0 0 30px rgba(70,255,120,0.08) !important;
+    }
+
+    .question.opt-empty {
+      border-color: var(--yellow) !important;
+      background: rgba(255, 224, 92, 0.08) !important;
+      box-shadow: 0 0 0 1px rgba(255,224,92,0.28), 0 0 14px rgba(255,224,92,0.14) !important;
+    }
+
+    .question.opt-filled {
+      border-color: var(--green) !important;
+      background: rgba(70, 255, 120, 0.10) !important;
+      box-shadow: 0 0 0 1px rgba(70,255,120,0.28), 0 0 16px rgba(70,255,120,0.18), 0 0 30px rgba(70,255,120,0.08) !important;
+    }
+
+    .option.missing-glow,
+    .code-input.missing-glow,
+    textarea.missing-glow {
+      border-color: var(--red) !important;
+      box-shadow: 0 0 14px rgba(255, 70, 70, 0.34), 0 0 28px rgba(255, 70, 70, 0.16) !important;
+      background: rgba(255, 60, 60, 0.14) !important;
+    }
+
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .submit-btn {
+      border: 2px solid rgba(255,255,255,0.28);
+      background: rgba(255,255,255,0.18);
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 0;
+      font-weight: 800;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 0 0 1px rgba(0,0,0,0.3), 0 0 18px rgba(255,255,255,0.08);
+    }
+
+    .submit-btn:hover {
+      background: rgba(255,255,255,0.24);
+      border-color: rgba(255,255,255,0.48);
+    }
+
+    .error-msg {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 0;
+      border: 2px solid rgba(255, 90, 90, 0.42);
+      background: rgba(255, 70, 70, 0.16);
+      color: #ffd7d7;
+      box-shadow: 0 0 18px rgba(255, 70, 70, 0.14);
+    }
+
+    .error-msg.show { display: block; }
+
+    .success-msg {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 0;
+      border: 2px solid rgba(80, 255, 140, 0.42);
+      background: rgba(70, 255, 120, 0.18);
+      color: #e8fff0;
+      box-shadow: 0 0 18px rgba(70, 255, 120, 0.18);
+    }
+
+    .success-msg.show { display: block; }
+
+    .search-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .search-grid { grid-template-columns: 1fr; }
+    }
+
+    .search-card {
+      border: 2px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06);
+      padding: 14px;
+      border-radius: 0;
+    }
+
+    .search-input-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .search-input-row input,
+    .search-input-row select {
+      flex: 1 1 220px;
+      border: 2px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.10);
+      color: #fff;
+      padding: 12px 14px;
+      border-radius: 0;
+      outline: none;
+    }
+
+    .search-input-row option { color: #111; }
+
+    .search-result {
+      margin-top: 14px;
+      padding: 14px;
+      border: 2px solid rgba(255,255,255,0.14);
+      background: rgba(0,0,0,0.16);
+      border-radius: 0;
+      min-height: 120px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+
+    .legend {
+      display: grid;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .legend-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 10px 12px;
+      border: 2px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      border-radius: 0;
+    }
+
+    .pill {
+      min-width: 92px;
+      text-align: center;
+      padding: 6px 10px;
+      border: 2px solid rgba(255,255,255,0.16);
+      background: rgba(255,255,255,0.10);
+      font-weight: 800;
+      color: #fff;
+      border-radius: 0;
+      flex: 0 0 auto;
+    }
+
+    .pill.red { border-color: rgba(255,70,70,0.75); background: rgba(255,70,70,0.16); }
+    .pill.green { border-color: rgba(70,255,120,0.75); background: rgba(70,255,120,0.16); }
+    .pill.yellow { border-color: rgba(255,224,92,0.75); background: rgba(255,224,92,0.16); }
+    .pill.blue { border-color: rgba(90,170,255,0.75); background: rgba(90,170,255,0.16); }
+    .pill.orange { border-color: rgba(255,166,64,0.75); background: rgba(255,166,64,0.16); }
+    .pill.purple { border-color: rgba(182,106,255,0.75); background: rgba(182,106,255,0.16); }
+    .pill.gray { border-color: rgba(220,220,220,0.65); background: rgba(220,220,220,0.14); }
+    .pill.teal { border-color: rgba(94,225,210,0.75); background: rgba(94,225,210,0.16); }
+    .pill.pink { border-color: rgba(255,110,200,0.75); background: rgba(255,110,200,0.16); }
+
+    .status-desc { color: rgba(255,255,255,0.88); }
+  </style>
+</head>
+<body>
+  <div class="animated-bg"></div>
+  <div class="overlay"></div>
+
+  <main class="hero">
+    <h1 class="title">Autenticación</h1>
+    <p class="subtitle">Sistema de registro de libros de "Foxcrak's ..." , el botón de revisar tiene fallas aun.</p>
+    <button class="main-btn" id="openBtn" type="button">Registrar</button>
+  </main>
+
+  <div class="excel-float">
+    <button class="excel-btn" id="excelBtn" type="button">Revisar</button>
+  </div>
+
+  <section class="backdrop" id="backdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-header">
+        <div>
+          <h2 id="modalTitle">AuthFXBooksSys</h2>
+          <p>Completa las opciones y el comentario opcional. El código se escribe manualmente con el formato fijo FOX encontrado en tu libro.</p>
+        </div>
+        <button class="close-btn" id="closeBtn" type="button" aria-label="Cerrar">×</button>
+      </div>
+
+      <form id="authForm" action="https://docs.google.com/forms/d/e/1FAIpQLSdem9XG06HnCouAniFvg34kv2NU8XAjq_OPQFn6dxSzFYnt1Q/formResponse" method="POST" target="hidden_iframe">
+        <div class="question req-empty" data-question="1">
+          <div class="question-title"><span class="badge">1</span> Elegir el libro</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="entry.493919483" value="Libro -2" required><div class="option-content"><span>Libro -2</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.493919483" value="Libro -1"><div class="option-content"><span>Libro -1</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.493919483" value="Libro 1"><div class="option-content"><span>Libro 1</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.493919483" value="Libro 2"><div class="option-content"><span>Libro 2</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.493919483" value="Libro 3"><div class="option-content"><span>Libro 3</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.493919483" value="Libro 4"><div class="option-content"><span>Libro 4</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.493919483" value="Libro 5"><div class="option-content"><span>Libro 5</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.493919483" value="Libro 6"><div class="option-content"><span>Libro 6</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.493919483" value="Libro 7"><div class="option-content"><span>Libro 7</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.493919483" value="FoxFest"><div class="option-content"><span>FoxFest</span><span class="check">✓</span></div></label>
+          </div>
+        </div>
+
+        <div class="question req-empty" data-question="2">
+          <div class="question-title"><span class="badge">2</span> Versión de idioma</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="entry.1899903329" value="Español" required><div class="option-content"><span>Español</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.1899903329" value="Inglés"><div class="option-content"><span>Inglés</span><span class="check">✓</span></div></label>
+          </div>
+        </div>
+
+        <div class="question req-empty" data-question="3">
+          <div class="question-title"><span class="badge">3</span> Edición</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="entry.1760265947" value="1ra edición" required><div class="option-content"><span>1ra edición</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.1760265947" value="2da edición"><div class="option-content"><span>2da edición</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.1760265947" value="3ra edición"><div class="option-content"><span>3ra edición</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.1760265947" value="4ta edición"><div class="option-content"><span>4ta edición</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.1760265947" value="5ta edición"><div class="option-content"><span>5ta edición</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.1760265947" value="6ta edición"><div class="option-content"><span>6ta edición</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.1760265947" value="7ma edición"><div class="option-content"><span>7ma edición</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.1760265947" value="8va edición"><div class="option-content"><span>8va edición</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.1760265947" value="9na edición"><div class="option-content"><span>9na edición</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.1760265947" value="10ma edición"><div class="option-content"><span>10ma edición</span><span class="check">✓</span></div></label>
+          </div>
+        </div>
+
+        <div class="question req-empty" data-question="4">
+          <div class="question-title"><span class="badge">4</span> Código del libro</div>
+          <div class="fixed-code-shell">
+            <span class="fixed-part">FOX</span>
+            <span class="fixed-part dash">-</span>
+            <input id="codePart1" class="code-input code-part" type="text" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="4" placeholder="aB12" aria-label="Primer bloque alfanumérico del código" required />
+            <span class="fixed-part dash">-</span>
+            <input id="codePart2" class="code-input code-part code-part-small" type="text" inputmode="text" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="3" placeholder="xY9" aria-label="Segundo bloque alfanumérico del código" required />
+            <input type="hidden" id="codigoLibro" name="entry.420357870" value="" />
+            <div class="code-hint">Ejemplo: aB12-xY9. Escribe letras mayúsculas, minúsculas y números; FOX y los guiones quedan fijos.</div>
+          </div>
+        </div>
+
+        <div class="question req-empty" data-question="5">
+          <div class="question-title"><span class="badge">5</span> Tipo de versión</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="entry.979008957" value="Experimental" required><div class="option-content"><span>Experimental</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.979008957" value="Final"><div class="option-content"><span>Final</span><span class="check">✓</span></div></label>
+          </div>
+        </div>
+
+        <div class="question req-empty" data-question="6">
+          <div class="question-title"><span class="badge">6</span> Contiene extras</div>
+          <div class="options">
+            <label class="option"><input type="radio" name="entry.870580350" value="Sí" required><div class="option-content"><span>Sí</span><span class="check">✓</span></div></label>
+            <label class="option"><input type="radio" name="entry.870580350" value="No"><div class="option-content"><span>No</span><span class="check">✓</span></div></label>
+          </div>
+        </div>
+
+        <div class="question opt-empty" data-question="7">
+          <div class="question-title"><span class="badge">7</span> Comentario adicional</div>
+          <textarea name="entry.1480036841" rows="4" class="code-input required-textarea" placeholder="Escribe un comentario adicional"></textarea>
+        </div>
+
+        <div class="footer-row">
+          <p id="progressText" style="margin:0; color: rgba(255,255,255,0.82);">Listo para enviar</p>
+          <button class="submit-btn" type="submit">Enviar respuestas</button>
+        </div>
+
+        <div id="errorBox" class="error-msg">Hay respuestas obligatorias por llenar. Revisa las opciones marcadas en rojo.</div>
+        <div id="successBox" class="success-msg">Respuestas enviadas correctamente, puedes consultar el estado temporal uando este enlace:https://docs.google.com/spreadsheets/d/16yMBbT8AtdUHB5qdMkpIZM5i-PBAY7LB48ElMV4iBBM/edit?usp=sharing</div>
+      </form>
+    </div>
+  </section>
+
+  <section class="backdrop" id="searchBackdrop" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="searchTitle" style="max-width: 1120px; width: min(95vw, 1120px);">
+      <div class="modal-header">
+        <div>
+          <h2 id="searchTitle">Buscador de registros</h2>
+          <p>Escribe el código de registro de 10 dígitos generado al enviar el formulario.</p>
+        </div>
+        <button class="close-btn" id="closeSearchBtn" type="button" aria-label="Cerrar">×</button>
+      </div>
+
+      <div class="search-grid">
+        <div class="search-card">
+          <strong>Buscar por código de registro</strong>
+          <div class="search-input-row">
+            <input id="searchCode" type="text" maxlength="10" placeholder="8392017456" autocomplete="off" inputmode="numeric" />
+            <button class="submit-btn" id="searchBtn" type="button">Buscar</button>
+          </div>
+          <div class="fox-suggestions" style="margin-top:10px;">Solo escribe los 10 dígitos. El sistema te devuelve el libro, idioma, edición, FOX y estado.</div>
+          <div id="searchResult" class="search-result">Escribe un código y pulsa Buscar.</div>
+        </div>
+
+        <div class="search-card">
+          <strong>Estados del sistema</strong>
+          <div class="legend">
+            <div class="legend-item"><div class="pill yellow">Pendiente</div><div class="status-desc">Registrado, pero todavía no revisado.</div></div>
+            <div class="legend-item"><div class="pill blue">En revisión</div><div class="status-desc">Se están comprobando los datos del libro.</div></div>
+            <div class="legend-item"><div class="pill green">Autenticado</div><div class="status-desc">Código válido y aprobado.</div></div>
+            <div class="legend-item"><div class="pill gray">Sin verificar</div><div class="status-desc">Hay registro, pero faltan comprobaciones.</div></div>
+            <div class="legend-item"><div class="pill orange">Experimental</div><div class="status-desc">Pertenece a una versión de prueba.</div></div>
+            <div class="legend-item"><div class="pill red">Rechazado</div><div class="status-desc">Datos incorrectos o no aprobados.</div></div>
+            <div class="legend-item"><div class="pill wine">Bloqueado</div><div class="status-desc">Código desactivado o restringido.</div></div>
+            <div class="legend-item"><div class="pill purple">Archivado</div><div class="status-desc">Registro antiguo guardado.</div></div>
+            <div class="legend-item"><div class="pill teal">Actualizado</div><div class="status-desc">Registro modificado recientemente.</div></div>
+            <div class="legend-item"><div class="pill pink">Inexistente</div><div class="status-desc">El código no aparece en la base de datos.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<iframe 
+class="hidden-iframe" 
+name="hidden_iframe" 
+title="hidden_iframe"
+style="display:none;">
+</iframe>
+
+  <script>
+  const backdrop = document.getElementById('backdrop');
+  const searchBackdrop = document.getElementById('searchBackdrop');
+  const openBtn = document.getElementById('openBtn');
+  const excelBtn = document.getElementById('excelBtn');
+  const closeBtn = document.getElementById('closeBtn');
+  const closeSearchBtn = document.getElementById('closeSearchBtn');
+  const authForm = document.getElementById('authForm');
+  const errorBox = document.getElementById('errorBox');
+  const successBox = document.getElementById('successBox');
+  const codigoLibro = document.getElementById('codigoLibro');
+  const codePart1 = document.getElementById('codePart1');
+  const codePart2 = document.getElementById('codePart2');
+  const progressText = document.getElementById('progressText');
+  const commentField = document.querySelector('textarea[name="entry.1480036841"]');
+  const questionBlocks = Array.from(document.querySelectorAll('.question'));
+  const searchBtn = document.getElementById('searchBtn');
+  const searchCode = document.getElementById('searchCode');
+  const searchResult = document.getElementById('searchResult');
+  const excelUrl = 'https://script.google.com/macros/s/AKfycbyW1-D-GjwrKM7K7swknU15hnArVNi-Oaqin7mrb9yoeW_xhLH_r1KS-7ftfiV21Uki/exec';
+
+  function keepAlphaNum(value, maxLen) {
+    let out = '';
+    const text = String(value || '');
+    for (let i = 0; i < text.length; i += 1) {
+      const ch = text.charAt(i);
+      const code = ch.charCodeAt(0);
+      const okDigit = code >= 48 && code <= 57;
+      const okUpper = code >= 65 && code <= 90;
+      const okLower = code >= 97 && code <= 122;
+      if (okDigit || okUpper || okLower) {
+        out += ch;
+        if (out.length >= maxLen) break;
+      }
+    }
+    return out;
+  }
+
+  function keepDigits(value, maxLen) {
+    let out = '';
+    const text = String(value || '');
+    for (let i = 0; i < text.length; i += 1) {
+      const ch = text.charAt(i);
+      const code = ch.charCodeAt(0);
+      if (code >= 48 && code <= 57) {
+        out += ch;
+        if (out.length >= maxLen) break;
+      }
+    }
+    return out;
+  }
+
+  function buildFOXCode() {
+    return 'FOX-' + codePart1.value.trim() + '-' + codePart2.value.trim();
+  }
+
+  function syncCodeField() {
+    codigoLibro.value = buildFOXCode();
+    if (!codePart1.value.trim() && !codePart2.value.trim()) {
+      progressText.textContent = 'Escribe los caracteres faltantes del código FOX.';
+    } else {
+      progressText.textContent = 'Código actual: ' + codigoLibro.value;
+    }
+  }
+
+  function setSelectedStyles() {
+    document.querySelectorAll('input[type="radio"]').forEach((input) => {
+      const label = input.closest('.option');
+      if (label) label.classList.toggle('selected', input.checked);
+    });
+  }
+
+  function updateBlockStates() {
+    const states = [
+      { el: questionBlocks[0], filled: !!document.querySelector('input[name="entry.493919483"]:checked'), required: true },
+      { el: questionBlocks[1], filled: !!document.querySelector('input[name="entry.1899903329"]:checked'), required: true },
+      { el: questionBlocks[2], filled: !!document.querySelector('input[name="entry.1760265947"]:checked'), required: true },
+      { el: questionBlocks[3], filled: codePart1.value.trim().length === 4 && codePart2.value.trim().length === 3, required: true },
+      { el: questionBlocks[4], filled: !!document.querySelector('input[name="entry.979008957"]:checked'), required: true },
+      { el: questionBlocks[5], filled: !!document.querySelector('input[name="entry.870580350"]:checked'), required: true },
+      { el: questionBlocks[6], filled: !!commentField && commentField.value.trim().length > 0, optional: true }
+    ];
+
+    states.forEach((item) => {
+      if (!item.el) return;
+      item.el.classList.remove('req-empty', 'req-filled', 'opt-empty', 'opt-filled');
+      if (item.optional) item.el.classList.add(item.filled ? 'opt-filled' : 'opt-empty');
+      else if (item.required) item.el.classList.add(item.filled ? 'req-filled' : 'req-empty');
+    });
+  }
+
+  function clearStates() {
+    questionBlocks.forEach((q) => q.classList.remove('req-empty', 'req-filled', 'opt-empty', 'opt-filled'));
+    updateBlockStates();
+  }
+
+  function openModal() {
+    backdrop.classList.add('show');
+    backdrop.setAttribute('aria-hidden', 'false');
+    syncCodeField();
+    setSelectedStyles();
+    updateBlockStates();
+  }
+
+  function closeModal() {
+    backdrop.classList.remove('show');
+    backdrop.setAttribute('aria-hidden', 'true');
+  }
+
+  function openSearch() {
+    searchBackdrop.classList.add('show');
+    searchBackdrop.setAttribute('aria-hidden', 'false');
+    if (searchCode) searchCode.value = '';
+    if (searchResult) searchResult.textContent = 'Escribe el código de registro de 10 dígitos y pulsa Buscar.';
+  }
+
+  function closeSearch() {
+    searchBackdrop.classList.remove('show');
+    searchBackdrop.setAttribute('aria-hidden', 'true');
+  }
+
+  openBtn.addEventListener('click', openModal);
+  excelBtn.addEventListener('click', openSearch);
+  closeBtn.addEventListener('click', closeModal);
+  closeSearchBtn.addEventListener('click', closeSearch);
+
+  backdrop.addEventListener('click', (e) => {
+    if (e.target === backdrop) closeModal();
+  });
+
+  searchBackdrop.addEventListener('click', (e) => {
+    if (e.target === searchBackdrop) closeSearch();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      closeSearch();
+    }
+  });
+
+  codePart1.addEventListener('input', () => {
+    codePart1.value = keepAlphaNum(codePart1.value, 4);
+    syncCodeField();
+    updateBlockStates();
+  });
+
+  codePart2.addEventListener('input', () => {
+    codePart2.value = keepAlphaNum(codePart2.value, 3);
+    syncCodeField();
+    updateBlockStates();
+  });
+
+  document.querySelectorAll('input[type="radio"]').forEach((input) => {
+    input.addEventListener('change', () => {
+      setSelectedStyles();
+      updateBlockStates();
+    });
+  });
+
+  if (commentField) commentField.addEventListener('input', updateBlockStates);
+
+  function markQuestion(questionEl, invalid) {
+    if (!questionEl) return;
+    questionEl.classList.toggle('missing-glow', invalid);
+  }
+
+  function isGroupSelected(name) {
+    return !!document.querySelector('input[name="' + name + '"]:checked');
+  }
+
+  function validateBeforeSubmit() {
+    errorBox.classList.remove('show');
+    successBox.classList.remove('show');
+    clearStates();
+
+    const missing = [];
+    const fields = [
+      { name: 'entry.493919483', label: 'Elegir el libro' },
+      { name: 'entry.1899903329', label: 'Versión de idioma' },
+      { name: 'entry.1760265947', label: 'Edición' },
+      { name: 'entry.420357870', label: 'Código del libro' },
+      { name: 'entry.979008957', label: 'Tipo de versión' },
+      { name: 'entry.870580350', label: 'Contiene extras' }
+    ];
+
+    fields.forEach((field) => {
+      if (field.name === 'entry.420357870') {
+        if (codePart1.value.trim().length !== 4 || codePart2.value.trim().length !== 3) {
+          markQuestion(questionBlocks[3], true);
+          missing.push(field.label);
+        }
+        return;
+      }
+
+      if (!isGroupSelected(field.name)) {
+        const first = document.querySelector('input[name="' + field.name + '"]');
+        if (first) markQuestion(first.closest('.question'), true);
+        missing.push(field.label);
+      }
+    });
+
+    updateBlockStates();
+
+    if (missing.length > 0) {
+      progressText.textContent = 'Hay respuestas obligatorias por llenar.';
+      errorBox.innerHTML = 'Faltan respuestas obligatorias por completar: <strong>' + missing.join(', ') + '</strong>.';
+      errorBox.classList.add('show');
+      document.body.classList.remove('camera-shake');
+      void document.body.offsetWidth;
+      document.body.classList.add('camera-shake');
+      setTimeout(() => document.body.classList.remove('camera-shake'), 800);
+      return false;
+    }
+
+    return true;
+  }
+
+  authForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!validateBeforeSubmit()) return;
+
+    codigoLibro.value = buildFOXCode();
+    errorBox.classList.remove('show');
+    successBox.classList.add('show');
+    progressText.textContent = 'Respuestas enviadas correctamente, espera a que se registre...';
+    authForm.submit();
+    setTimeout(() => successBox.classList.remove('show'), 2600);
+  });
+
+  function escapeHtml(v) {
+    return String(v ?? '').replace(/[&<>]/g, (m) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+  }
+
+  function renderRecord(result) {
+    if (!searchResult) return;
+    if (!result) {
+      searchResult.innerHTML = '<div><strong>Estado:</strong> <span style="color:var(--pink)">Inexistente</span></div><div style="margin-top:8px;">No se encontró ningún registro con ese valor.</div><div style="margin-top:8px; color: rgba(255,255,255,0.82);">Revisa el código de 10 dígitos.</div>';
+      return;
+    }
+
+    searchResult.innerHTML = '<div><strong>Código:</strong> ' + escapeHtml(result.codigo) + '</div>' +
+      '<div><strong>Libro:</strong> ' + escapeHtml(result.libro) + '</div>' +
+      '<div><strong>Idioma:</strong> ' + escapeHtml(result.idioma) + '</div>' +
+      '<div><strong>Edición:</strong> ' + escapeHtml(result.edicion) + '</div>' +
+      '<div><strong>FOX:</strong> ' + escapeHtml(result.fox) + '</div>' +
+      '<div><strong>Versión:</strong> ' + escapeHtml(result.version) + '</div>' +
+      '<div><strong>Extras:</strong> ' + escapeHtml(result.extras) + '</div>' +
+      '<div><strong>Estado:</strong> ' + escapeHtml(result.estado || 'Pendiente') + '</div>' +
+      '<div style="margin-top:8px;"><strong>Comentario:</strong> ' + escapeHtml(result.comentario || '') + '</div>';
+  }
+
+  async function searchSheet() {
+    if (!searchResult) return;
+    const codigo = keepDigits(searchCode.value, 10);
+
+    if (!codigo) {
+      searchResult.textContent = 'Escribe el código de registro de 10 dígitos.';
+      return;
+    }
+
+    searchCode.value = codigo;
+    searchResult.textContent = 'Buscando...';
+
+    try {
+      const url = excelUrl + '?codigo=' + encodeURIComponent(codigo) + '&q=' + encodeURIComponent(codigo);
+      const response = await fetch(url, { method: 'GET', mode: 'cors', cache: 'no-store' });
+      const data = await response.json();
+      renderRecord(data && data.found ? data.record : null);
+    } catch (error) {
+      searchResult.innerHTML = '<div><strong>No se pudo conectar.</strong></div><div style="margin-top:8px;">Asegúrate de que el Apps Script devuelva JSON con CORS habilitado.</div>';
+    }
+  }
+
+  searchCode.addEventListener('input', () => {
+    searchCode.value = keepDigits(searchCode.value, 10);
+  });
+
+  searchCode.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') searchSheet();
+  });
+
+  searchBtn.addEventListener('click', searchSheet);
+
+  window.addEventListener('load', () => {
+    setSelectedStyles();
+    updateBlockStates();
+    syncCodeField();
+  });
+</script>
+</body>
+</html>
